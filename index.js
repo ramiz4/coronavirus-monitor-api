@@ -6,7 +6,11 @@ var app = express();
 var PORT = process.env.PORT || 3000;
 var url = 'https://raw.githubusercontent.com/ramiz4/coronavirus-monitor/master/src/assets/rks.json';
 
-var whitelist = ['http://localhost:4200', 'http://corona-monitor.ramizloki.com/'];
+var whitelist = [
+  'http://localhost:4200', 
+  'https://coronavirus-monitor-api.herokuapp.com/',
+  'http://corona-monitor.ramizloki.com/'
+];
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
