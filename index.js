@@ -4,7 +4,7 @@ var https = require('https');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
-var url = 'https://raw.githubusercontent.com/ramiz4/coronavirus-monitor/master/src/assets/rks.json';
+var url = 'https://raw.githubusercontent.com/ramiz4/coronavirus-monitor-data/master/rks.json';
 
 app.use(cors());
 
