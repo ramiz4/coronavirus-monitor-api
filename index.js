@@ -87,7 +87,7 @@ function getCityMap(data) {
 app.use(function (req, res, next) {
     console.log('Time:', Date.now());
     if (!client.isConnected()) {
-        return res.status(500).send({ message: 'Database ' + MONGO_URI + ' is not connected.' });
+        return res.status(500).send({ message: 'Database is not connected.' });
     }
     next();
 });
