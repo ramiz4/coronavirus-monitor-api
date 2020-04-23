@@ -30,6 +30,7 @@ client.connect()
         userCollection = db.collection('user');
     })
     .catch(function (error) {
+        console.log('Cannot connect to ' + MONGO_URI);
         console.error(error);
     });
 
