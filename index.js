@@ -16,6 +16,7 @@ app.use(cors());
 
 var PORT = process.env.PORT || 3000;
 var MONGO_URI = process.env.MONGO_URI|| 'mongodb://localhost:27017/corona-monitor';
+var MONGO_DB = process.env.MONGO_DB|| 'corona-monitor';
 
 var client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -25,7 +26,7 @@ var userCollection;
 client.connect()
     .then(function (client) {
         console.log('Connected to Database');
-        var db = client.db('corona-monitor');
+        var db = client.db(MONGO_DB);
         dataCollection = db.collection('data');
         userCollection = db.collection('user');
     })
