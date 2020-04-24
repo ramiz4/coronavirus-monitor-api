@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 
 var config = require('./config');
-var VerifyToken = require('./auth/VerifyToken');
+// var VerifyToken = require('./auth/VerifyToken');
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -15,8 +15,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 var PORT = process.env.PORT || 3000;
-var MONGO_URI = process.env.MONGODB_URI|| 'mongodb://localhost:27017/corona-monitor';
-var MONGO_DB = process.env.MONGODB|| 'corona-monitor';
+var MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/corona-monitor';
+var MONGO_DB = process.env.MONGODB || 'corona-monitor';
 
 var client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -40,8 +40,8 @@ function getCityMap(data) {
     var cityMap = [];
     var tempCityMap = {};
 
-    data.forEach(function(stat) {
-        stat.confirmed.forEach(function(x) {
+    data.forEach(function (stat) {
+        stat.confirmed.forEach(function (x) {
             if (!tempCityMap.hasOwnProperty(x.city)) {
                 tempCityMap[x.city] = {};
                 tempCityMap[x.city].data = [];
@@ -52,13 +52,13 @@ function getCityMap(data) {
             // ex. for Ferizaj https://maps.googleapis.com/maps/api/geocode/json?address=Ferizaj&key=AIzaSyBJcXftvGs8DpYqYS87wn14gzoeRWxIczg
             // tempCityMap[x.city].center = { lat: 42.662914, lng: 21.165503 };
             tempCityMap[x.city].center = x.location;
-            tempCityMap[x.city].confirmedTotal = tempCityMap[x.city].data.reduce(function(a, b) {
+            tempCityMap[x.city].confirmedTotal = tempCityMap[x.city].data.reduce(function (a, b) {
                 return a + (b.total || 0);
             }, 0);
         });
     });
 
-    Object.keys(tempCityMap).forEach(function(key) {
+    Object.keys(tempCityMap).forEach(function (key) {
         delete tempCityMap[key].data;
         cityMap.push(
             {
@@ -131,7 +131,7 @@ app.post('/users/authenticate', function (req, res) {
         var token = jwt.sign({ id: user._id }, config.secret, {
             expiresIn: 86400 // expires in 24 hours
         });
-        
+
         delete user.password;
         res.status(200).send({ user: user, auth: true, token: token });
     });
@@ -195,24 +195,24 @@ app.post('/data', function (req, res) {
     jwt.verify(token, config.secret, function (err, decoded) {
         if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
 
-        var insert ;
-        if(Array.isArray(req.body)) {
+        var insert;
+        if (Array.isArray(req.body)) {
             insert = dataCollection.insertMany(req.body);
         } else {
             insert = dataCollection.insert(req.body);
         }
-    
-        insert.then(function (results) {
-            console.log(results);
-            // res.status(200).send(decoded);
-            res.status(204).send();
-        })
-        .catch(function (error) {
-            console.error(error);
-            res.status(500).send("Error: " + error.message);
-        });
-    });
 
+        insert
+            .then(function (results) {
+                console.log(results);
+                // res.status(200).send(decoded);
+                res.status(204).send();
+            })
+            .catch(function (error) {
+                console.error(error);
+                res.status(500).send("Error: " + error.message);
+            });
+    });
 
 });
 
