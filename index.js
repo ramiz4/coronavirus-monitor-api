@@ -15,8 +15,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 var PORT = process.env.PORT || 3000;
-var MONGO_URI = process.env.MONGO_URI|| 'mongodb://localhost:27017/corona-monitor';
-var MONGO_DB = process.env.MONGO_DB|| 'corona-monitor';
+var MONGO_URI = process.env.MONGODB_URI|| 'mongodb://localhost:27017/corona-monitor';
+var MONGO_DB = process.env.MONGODB|| 'corona-monitor';
 
 var client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
