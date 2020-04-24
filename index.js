@@ -96,28 +96,28 @@ app.use(function (req, res, next) {
 
 app.post('/users/register', function (req, res) {
 
-    // res.status(200).send("registration is disabled.");
+    res.status(200).send("registration is disabled.");
 
-    var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+    // var hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
-    var newUser = {
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
-    };
+    // var newUser = {
+    //     name: req.body.name,
+    //     email: req.body.email,
+    //     password: hashedPassword
+    // };
 
-    userCollection.insert(newUser)
-        .then(function (result) {
-            console.log(result);
-            var token = jwt.sign({ id: result._id }, config.secret, {
-                expiresIn: 86400 // expires in 24 hours
-            });
-            res.status(200).send({ auth: true, token: token });
-        })
-        .catch(function (error) {
-            console.error(error);
-            res.status(500).send("Error: " + error.message);
-        });
+    // userCollection.insert(newUser)
+    //     .then(function (result) {
+    //         console.log(result);
+    //         var token = jwt.sign({ id: result._id }, config.secret, {
+    //             expiresIn: 86400 // expires in 24 hours
+    //         });
+    //         res.status(200).send({ auth: true, token: token });
+    //     })
+    //     .catch(function (error) {
+    //         console.error(error);
+    //         res.status(500).send("Error: " + error.message);
+    //     });
 });
 
 app.post('/users/authenticate', function (req, res) {
@@ -141,13 +141,13 @@ app.get('/users/logout', function (req, res) {
     res.status(200).send({ auth: false, token: null });
 });
 
-app.get('/users/me', VerifyToken, function (req, res, next) {
-    userCollection.findById(req.userId, { password: 0 }, function (err, user) {
-        if (err) return res.status(500).send("There was a problem finding the user.");
-        if (!user) return res.status(404).send("No user found.");
-        res.status(200).send(user);
-    });
-});
+// app.get('/users/me', VerifyToken, function (req, res, next) {
+//     userCollection.findById(req.userId, { password: 0 }, function (err, user) {
+//         if (err) return res.status(500).send("There was a problem finding the user.");
+//         if (!user) return res.status(404).send("No user found.");
+//         res.status(200).send(user);
+//     });
+// });
 
 app.get('/data', function (req, res) {
     dataCollection.find().sort({ date: 1 }).toArray()
