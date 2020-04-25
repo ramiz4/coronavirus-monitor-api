@@ -42,19 +42,21 @@ function getCityMap(data) {
 
     data.forEach(function (stat) {
         stat.confirmed.forEach(function (x) {
-            if (!tempCityMap.hasOwnProperty(x.city)) {
-                tempCityMap[x.city] = {};
-                tempCityMap[x.city].data = [];
+            if(x.city) {
+                if (!tempCityMap.hasOwnProperty(x.city)) {
+                    tempCityMap[x.city] = {};
+                    tempCityMap[x.city].data = [];
+                }
+                tempCityMap[x.city].data.push(x);
+                tempCityMap[x.city].label = x.city;
+                
+                // ex. for Ferizaj https://maps.googleapis.com/maps/api/geocode/json?address=Ferizaj&key=AIzaSyBJcXftvGs8DpYqYS87wn14gzoeRWxIczg
+                // tempCityMap[x.city].center = { lat: 42.662914, lng: 21.165503 };
+                tempCityMap[x.city].center = x.location;
+                tempCityMap[x.city].confirmedTotal = tempCityMap[x.city].data.reduce(function (a, b) {
+                    return a + (b.total || 0);
+                }, 0);
             }
-            tempCityMap[x.city].data.push(x);
-            tempCityMap[x.city].label = x.city;
-
-            // ex. for Ferizaj https://maps.googleapis.com/maps/api/geocode/json?address=Ferizaj&key=AIzaSyBJcXftvGs8DpYqYS87wn14gzoeRWxIczg
-            // tempCityMap[x.city].center = { lat: 42.662914, lng: 21.165503 };
-            tempCityMap[x.city].center = x.location;
-            tempCityMap[x.city].confirmedTotal = tempCityMap[x.city].data.reduce(function (a, b) {
-                return a + (b.total || 0);
-            }, 0);
         });
     });
 
