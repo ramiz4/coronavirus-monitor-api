@@ -155,6 +155,11 @@ app.get('/data', function (req, res) {
     dataCollection.find().sort({ date: 1 }).toArray()
         .then(function (results) {
             console.log(results);
+            results.forEach(function(result) {
+                result.confirmed.sort(function(a, b) { return b.total - a.total; });
+                result.recovered.sort(function(a, b) { return b.total - a.total; });
+                result.deaths.sort(function(a, b) { return b.total - a.total; });
+            });
             res.send(results);
         })
         .catch(function (error) {
