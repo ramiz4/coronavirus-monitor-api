@@ -42,14 +42,14 @@ function getCityMap(data) {
 
     data.forEach(function (stat) {
         stat.confirmed.forEach(function (x) {
-            if(x.city) {
+            if (x.city) {
                 if (!tempCityMap.hasOwnProperty(x.city)) {
                     tempCityMap[x.city] = {};
                     tempCityMap[x.city].data = [];
                 }
                 tempCityMap[x.city].data.push(x);
                 tempCityMap[x.city].label = x.city;
-                
+
                 // ex. for Ferizaj https://maps.googleapis.com/maps/api/geocode/json?address=Ferizaj&key=AIzaSyBJcXftvGs8DpYqYS87wn14gzoeRWxIczg
                 // tempCityMap[x.city].center = { lat: 42.662914, lng: 21.165503 };
                 tempCityMap[x.city].center = x.location;
@@ -155,10 +155,41 @@ app.get('/data', function (req, res) {
     dataCollection.find().sort({ date: 1 }).toArray()
         .then(function (results) {
             console.log(results);
-            results.forEach(function(result) {
-                result.confirmed.sort(function(a, b) { return b.total - a.total; });
-                result.recovered.sort(function(a, b) { return b.total - a.total; });
-                result.deaths.sort(function(a, b) { return b.total - a.total; });
+            var confirmedCumulated = 0;
+            var recoveredCumulated = 0;
+            var deathsCumulated = 0;
+
+            results.forEach(function (result) {
+                var confirmed = result.confirmed.map(x => x.total);
+                if (confirmed && confirmed.length > 0) {
+                    result.confirmedTotal = confirmed.reduce((a, b) => a + b);
+                } else {
+                    result.confirmedTotal = 0;
+                }
+                confirmedCumulated += result.confirmedTotal;
+                result.confirmedCumulated = confirmedCumulated;
+
+                var recovered = result.recovered.map(x => x.total);
+                if (recovered && recovered.length > 0) {
+                    result.recoveredTotal = recovered.reduce((a, b) => a + b);
+                } else {
+                    result.recoveredTotal = 0;
+                }
+                recoveredCumulated += result.recoveredTotal;
+                result.recoveredCumulated = recoveredCumulated;
+
+                var deaths = result.deaths.map(x => x.total);
+                if (deaths && deaths.length > 0) {
+                    result.deathsTotal = deaths.reduce((a, b) => a + b);
+                } else {
+                    result.deathsTotal = 0;
+                }
+                deathsCumulated += result.deathsTotal;
+                result.deathsCumulated = deathsCumulated;
+
+                result.confirmed.sort(function (a, b) { return b.total - a.total; });
+                result.recovered.sort(function (a, b) { return b.total - a.total; });
+                result.deaths.sort(function (a, b) { return b.total - a.total; });
             });
             res.send(results);
         })
