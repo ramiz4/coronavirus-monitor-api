@@ -22,6 +22,7 @@ var client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 var dataCollection;
 var userCollection;
+var tempCityMap = {};
 
 client.connect()
     .then(function (client) {
@@ -35,28 +36,40 @@ client.connect()
         console.error(error);
     });
 
-function getCityMap(data) {
+function fillTempCityMap(x, key) {
+    if (x.city) {
+        if (!tempCityMap.hasOwnProperty(x.city)) {
+            tempCityMap[x.city] = {};
+        }
+        if(!tempCityMap[x.city].data) {
+            tempCityMap[x.city].data = [];
+        }
+        tempCityMap[x.city].data.push(x);
+        tempCityMap[x.city].label = x.city;
+        tempCityMap[x.city].center = x.location;
+        tempCityMap[x.city][key + 'Total'] = tempCityMap[x.city].data.reduce(function (a, b) {
+            return a + (b.total || 0);
+        }, 0);
+    }
+}
 
+function getCityMap(data) {
     var cityMap = [];
-    var tempCityMap = {};
+    tempCityMap = {};
 
     data.forEach(function (stat) {
         stat.confirmed.forEach(function (x) {
-            if (x.city) {
-                if (!tempCityMap.hasOwnProperty(x.city)) {
-                    tempCityMap[x.city] = {};
-                    tempCityMap[x.city].data = [];
-                }
-                tempCityMap[x.city].data.push(x);
-                tempCityMap[x.city].label = x.city;
+            fillTempCityMap(x, 'confirmed');
+        });
+    });
 
-                // ex. for Ferizaj https://maps.googleapis.com/maps/api/geocode/json?address=Ferizaj&key=AIzaSyBJcXftvGs8DpYqYS87wn14gzoeRWxIczg
-                // tempCityMap[x.city].center = { lat: 42.662914, lng: 21.165503 };
-                tempCityMap[x.city].center = x.location;
-                tempCityMap[x.city].confirmedTotal = tempCityMap[x.city].data.reduce(function (a, b) {
-                    return a + (b.total || 0);
-                }, 0);
-            }
+    Object.keys(tempCityMap).forEach(function (key) {
+        delete tempCityMap[key].data;
+    });
+        
+    data.forEach(function (stat) {
+        stat.recovered.forEach(function (x) {
+            fillTempCityMap(x, 'recovered');
         });
     });
 
@@ -66,7 +79,8 @@ function getCityMap(data) {
             {
                 label: tempCityMap[key].label,
                 center: tempCityMap[key].center,
-                confirmedTotal: tempCityMap[key].confirmedTotal
+                confirmedTotal: tempCityMap[key].confirmedTotal,
+                recoveredTotal: tempCityMap[key].recoveredTotal
             }
         );
     });
@@ -74,14 +88,8 @@ function getCityMap(data) {
     cityMap.sort(function (a, b) {
         var nameA = a.label.toUpperCase(); // Groß-/Kleinschreibung ignorieren
         var nameB = b.label.toUpperCase(); // Groß-/Kleinschreibung ignorieren
-        if (nameA < nameB) {
-            return -1;
-        }
-        if (nameA > nameB) {
-            return 1;
-        }
-
-        // Namen müssen gleich sein
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
         return 0;
     });
 
@@ -142,14 +150,6 @@ app.post('/users/authenticate', function (req, res) {
 app.get('/users/logout', function (req, res) {
     res.status(200).send({ auth: false, token: null });
 });
-
-// app.get('/users/me', VerifyToken, function (req, res, next) {
-//     userCollection.findById(req.userId, { password: 0 }, function (err, user) {
-//         if (err) return res.status(500).send("There was a problem finding the user.");
-//         if (!user) return res.status(404).send("No user found.");
-//         res.status(200).send(user);
-//     });
-// });
 
 app.get('/data', function (req, res) {
     dataCollection.find().sort({ date: 1 }).toArray()
