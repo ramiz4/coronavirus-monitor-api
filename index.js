@@ -132,11 +132,11 @@ app.post('/users/register', function (req, res) {
 
 app.post('/users/authenticate', function (req, res) {
     userCollection.findOne({ email: req.body.email }, function (err, user) {
-        if (err) return res.status(500).send('Error on the server.');
-        if (!user) return res.status(404).send('No user found.');
+        if (err) return res.status(500).send({ auth: false, token: null, msg: 'There was a problem with your login.' });
+        if (!user) return res.status(404).send({ auth: false, token: null, msg: 'There was a problem with your login.' });
 
         var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-        if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
+        if (!passwordIsValid) return res.status(401).send({ auth: false, token: null, msg: 'There was a problem with your login.' });
 
         var token = jwt.sign({ id: user._id }, config.secret, {
             expiresIn: 86400 // expires in 24 hours
